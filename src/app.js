@@ -26,8 +26,31 @@ function seedVerb(inf, en, tenses) { return { id: uid(), inf, en, tenses }; }
 function seedTense(mood, tense, forms) { return { id: uid(), mood, tense, forms }; }
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
+// ---- Mood → Tense map ----
+const TENSES = {
+  indicativo: [
+    "presente", "imperfetto", "passato prossimo", "trapassato prossimo",
+    "passato remoto", "trapassato remoto", "futuro semplice", "futuro anteriore"
+  ],
+  congiuntivo: ["presente", "imperfetto", "passato", "trapassato"],
+  condizionale: ["presente", "passato"],
+  imperativo: ["presente"],
+  infinito: ["presente", "passato"],
+  gerundio: ["presente", "passato"],
+  participio: ["presente", "passato"]
+};
+
+// renders the <select> options for the chosen mood
+function renderTenseOptions(selectEl, mood, currentValue = "") {
+  const options = (TENSES[mood] || []).slice();
+  if (currentValue && !options.includes(currentValue)) options.unshift(currentValue);
+  selectEl.innerHTML = options.map(
+    t => `<option ${t === currentValue ? 'selected' : ''}>${t}</option>`
+  ).join('');
+}
+
 // ---------------- Version check ----------------
-const APP_VERSION = "0.0.1"; // bump this when you push new seeds
+const APP_VERSION = "0.0.2"; // bump this when you push new seeds
 
 function checkVersion() {
   const storedVersion = localStorage.getItem('appVersion');
@@ -187,42 +210,55 @@ function closeVerbModal() {
     EDIT_VERB_ID = null;
 }
 
-function addTenseUI(t) {
-    const id = t.id || uid();
-    const box = document.createElement('div');
-    box.className = 'tense-box';
-    box.setAttribute('data-tense-id', id);
-    box.innerHTML = `
+function addTenseUI(t){
+  const id = t.id || uid();
+  const box = document.createElement('div');
+  box.className = 'tense-box';
+  box.setAttribute('data-tense-id', id);
+  box.innerHTML = `
     <div class="row">
-    <div>
+      <div>
         <label>Mood</label>
         <select class="mood">
-        ${['indicativo', 'congiuntivo', 'condizionale', 'imperativo', 'infinito', 'gerundio', 'participio']
-            .map(m => `<option ${m === t.mood ? 'selected' : ''}>${m}</option>`).join('')}
+          ${['indicativo','congiuntivo','condizionale','imperativo','infinito','gerundio','participio']
+            .map(m=>`<option ${m===(t.mood||'indicativo')?'selected':''}>${m}</option>`).join('')}
         </select>
-    </div>
-    <div>
+      </div>
+      <div>
         <label>Tense</label>
-        <input class="tense" placeholder="presente / passato prossimo / imperfetto …" value="${t.tense || ''}" />
-    </div>
+        <select class="tense-select"></select>
+      </div>
     </div>
     <div class="tense-grid">
-    ${inputRow('io', t.forms?.io || '')}
-    ${inputRow('tu', t.forms?.tu || '')}
-    ${inputRow('lui_lei', t.forms?.lui_lei || '')}
-    ${inputRow('noi', t.forms?.noi || '')}
-    ${inputRow('voi', t.forms?.voi || '')}
-    ${inputRow('loro', t.forms?.loro || '')}
+      ${inputRow('io', t.forms?.io||'')}
+      ${inputRow('tu', t.forms?.tu||'')}
+      ${inputRow('lui_lei', t.forms?.lui_lei||'')}
+      ${inputRow('noi', t.forms?.noi||'')}
+      ${inputRow('voi', t.forms?.voi||'')}
+      ${inputRow('loro', t.forms?.loro||'')}
     </div>
     <div class="right" style="margin-top:8px;">
-    <button class="btn small danger" data-remove-tense>Remove tense</button>
+      <button class="btn small danger" data-remove-tense>Remove tense</button>
     </div>
-`;
-    tenseContainer.appendChild(box);
-    box.querySelector('[data-remove-tense]').addEventListener('click', () => {
-        box.remove();
-    });
+  `;
+  tenseContainer.appendChild(box);
+
+  const moodSel  = box.querySelector('.mood');
+  const tenseSel = box.querySelector('.tense-select');
+
+  // initial fill
+  renderTenseOptions(tenseSel, t.mood || 'indicativo', t.tense || 'presente');
+
+  // when mood changes, re-render tenses (keep current if valid)
+  moodSel.addEventListener('change', () => {
+    const current = tenseSel.value;
+    renderTenseOptions(tenseSel, moodSel.value, current);
+  });
+
+  // remove block
+  box.querySelector('[data-remove-tense]').addEventListener('click', ()=> box.remove());
 }
+
 function inputRow(label, val) {
     const pretty = label === 'lui_lei' ? 'lui/lei' : label;
     return `
@@ -250,7 +286,7 @@ saveVerbBtn.addEventListener('click', () => {
     // Gather tenses from UI
     const tenses = [...tenseContainer.querySelectorAll('.tense-box')].map(box => {
         const mood = box.querySelector('.mood').value.trim();
-        const tense = box.querySelector('.tense').value.trim();
+        const tense = box.querySelector('.tense-select').value.trim();
         const inputs = box.querySelectorAll('input[data-pronoun]');
         const forms = {};
         inputs.forEach(i => forms[i.getAttribute('data-pronoun')] = i.value.trim());
