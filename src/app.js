@@ -10,7 +10,9 @@ const defaultData = {
             seedTense('indicativo', 'futuro semplice', { io: 'sarò', tu: 'sarai', 'lui_lei': 'sarà', noi: 'saremo', voi: 'sarete', loro: 'saranno' })
         ]),
         seedVerb('Avere', 'to have', [
-            seedTense('indicativo', 'presente', { io: 'ho', tu: 'hai', 'lui_lei': 'ha', noi: 'abbiamo', voi: 'avete', loro: 'hanno' })
+            seedTense('indicativo', 'presente', { io: 'ho', tu: 'hai', 'lui_lei': 'ha', noi: 'abbiamo', voi: 'avete', loro: 'hanno' }),
+            seedTense('indicativo', 'imperfetto', { io: 'avevo', tu: 'avevi', 'lui_lei': 'aveva', noi: 'avevamo', voi: 'avevate', loro: 'avevano' }),
+            seedTense('indicativo', 'futuro semplice', { io: 'avrò', tu: 'avrai', 'lui_lei': 'avrà', noi: 'avremo', voi: 'avrete', loro: 'avranno' })
         ]),
         seedVerb('Andare', 'to go', [
             seedTense('indicativo', 'presente', { io: 'vado', tu: 'vai', 'lui_lei': 'va', noi: 'andiamo', voi: 'andate', loro: 'vanno' })
@@ -21,6 +23,22 @@ const defaultData = {
 function seedVerb(inf, en, tenses) { return { id: uid(), inf, en, tenses }; }
 function seedTense(mood, tense, forms) { return { id: uid(), mood, tense, forms }; }
 function uid() { return Math.random().toString(36).slice(2, 10); }
+
+// ---------------- Version check ----------------
+const APP_VERSION = "0.0.1"; // bump this when you push new seeds
+
+function checkVersion() {
+  const storedVersion = localStorage.getItem('appVersion');
+  if (storedVersion !== APP_VERSION) {
+    localStorage.removeItem(LS_KEY); // wipe outdated data
+    localStorage.setItem('appVersion', APP_VERSION);
+    console.log(`Updated to version ${APP_VERSION} — cache reset.`);
+  }
+}
+
+checkVersion();
+// ------------------------------------------------
+
 
 function load() {
     try {
