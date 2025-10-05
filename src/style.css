@@ -169,86 +169,152 @@ h1 {
 
 /* --- Flashcard deck container --- */
 .deck {
-  position: relative;
-  height: 340px;            /* mobile-friendly height */
-  margin-top: 12px;
+    position: relative;
+    height: 340px;
+    /* mobile-friendly height */
+    margin-top: 12px;
 }
 
 /* Each stacked item (we only make the top one interactive) */
 .deck .flashcard {
-  position: absolute;
-  inset: 0;
-  border: none;
-  background: transparent;
-  touch-action: pan-y; /* allow horizontal swipes while keeping vertical page scroll */
+    position: absolute;
+    inset: 0;
+    border: none;
+    background: transparent;
+    touch-action: pan-y;
+    /* allow horizontal swipes while keeping vertical page scroll */
 }
 
 /* 3D flip scaffold */
 .card3d {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: min(520px, 94vw);
-  height: 300px;
-  transform: translate(-50%, -50%);
-  perspective: 1200px;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    isolation: isolate;
+    min-width: 420px;
+    max-width: 100%;
+    width: fit-content;
+    min-height: 320px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
 }
 
+/* The flipper */
 .card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 16px;
-  border: 1px solid #e5e5e5;
-  background: var(--white);
-  box-shadow: 0 10px 24px rgba(0,0,0,.08);
-  transform-style: preserve-3d;
-  transition: transform .45s ease;
-  overflow: hidden;
+    width: 100%;
+    min-height: 320px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
 }
 
 /* flipped state */
-.card-inner.is-flipped { transform: rotateY(180deg); }
+.card-inner.is-flipped {
+    transform: rotateY(180deg) translateZ(0);
+    /* keep it on the same layer */
+}
 
+/* Faces live on different z-planes so Chrome can't z-fight */
 .card-face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  padding: 14px;
+    position: absolute;
+    width: 100%;
+    min-height: 320px;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 24px 28px 24px 28px;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+    border-radius: 16px;
+    box-sizing: border-box;
 }
 
-/* front = prompt */
+/* FRONT: explicitly 0° and slightly forward */
 .card-face.front {
-  background: #fff;
-  border-top: 5px solid transparent;
-  border-image: linear-gradient(to right, var(--green), var(--white) 33%, var(--red) 66%) 1;
+    transform: rotateY(0deg) translateZ(0.5px);
+    background: #fff;
+    border-top: 5px solid transparent;
+    border-image: linear-gradient(to right, var(--green), var(--white) 33%, var(--red) 66%) 1;
+    z-index: 2;
 }
 
-/* back = answer table */
+/* BACK: 180° and a touch further forward than front when flipped */
 .card-face.back {
-  transform: rotateY(180deg);
-  background: #fff;
+    transform: rotateY(180deg) translateZ(1px);
+    background: #fff;
+    z-index: 1;
 }
 
-.card-title { display:flex; align-items:center; gap:8px; }
-.table-compact { width:100%; border-collapse: collapse; }
-.table-compact td, .table-compact th { border:1px solid #f0f0f0; padding:6px 8px; text-align:left; }
-.table-compact thead th { background:#fcfcfc; }
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Card faces handle their own backgrounds. No forced background on all children. */
+
+.table-compact {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-compact td,
+.table-compact th {
+    border: 1px solid #f0f0f0;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.table-compact thead th {
+    background: #fcfcfc;
+}
 
 /* Deck controls under the card */
 .card-actions {
-  display:flex; gap:8px; justify-content:center; align-items:center; margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
 }
-.fc-btn { padding:8px 12px; border:1px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; }
-.fc-btn.primary { background: var(--green); color:#fff; border-color: var(--green); }
-.fc-btn.primary:hover { background: var(--red); border-color: var(--red); }
+
+.fc-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.fc-btn.primary {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+}
+
+.fc-btn.primary:hover {
+    background: var(--red);
+    border-color: var(--red);
+}
 
 /* motion accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .card-inner { transition: none; }
+    .card-inner {
+        transition: none;
+    }
 }
 
 
