@@ -65,7 +65,7 @@ function renderTenseOptions(selectEl, mood, currentValue = "") {
 }
 
 // ---------------- Version check ----------------
-const APP_VERSION = "0.0.6"; // bump this when you push new seeds
+const APP_VERSION = "0.0.7"; // bump this when you push new seeds
 
 function checkVersion() {
   const storedVersion = localStorage.getItem('appVersion');
@@ -328,7 +328,8 @@ function openVerbModal(verbId = null, focusTenseId = null) {
         addTenseUI(seedTense('indicativo', 'presente', { io: '', tu: '', 'lui_lei': '', noi: '', voi: '', loro: '' }));
     }
 
-    modalBackdrop.style.display = 'flex';
+  modalBackdrop.style.display = 'flex';
+  document.body.classList.add('modal-open');
     if (focusTenseId) {
         // scroll to specific tense block
         setTimeout(() => {
@@ -338,8 +339,9 @@ function openVerbModal(verbId = null, focusTenseId = null) {
     }
 }
 function closeVerbModal() {
-    modalBackdrop.style.display = 'none';
-    EDIT_VERB_ID = null;
+  modalBackdrop.style.display = 'none';
+  document.body.classList.remove('modal-open');
+  EDIT_VERB_ID = null;
 }
 
 function addTenseUI(t){

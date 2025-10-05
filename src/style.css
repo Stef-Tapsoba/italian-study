@@ -1,3 +1,13 @@
+/* Hide cards and actions when modal is open (body has .modal-open) */
+body.modal-open .deck,
+body.modal-open .card-actions {
+    display: none !important;
+}
+/* Hide cards and actions when modal is open */
+.modal-backdrop[style*="display: flex"] ~ main .deck,
+.modal-backdrop[style*="display: flex"] ~ main .card-actions {
+    display: none !important;
+}
 :root {
 
     /* Italian palette */
@@ -181,8 +191,7 @@ h1 {
     inset: 0;
     border: none;
     background: transparent;
-    touch-action: pan-y;
-    /* allow horizontal swipes while keeping vertical page scroll */
+    touch-action: pan-x;
 }
 
 /* 3D flip scaffold */
