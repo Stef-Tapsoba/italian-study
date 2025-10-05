@@ -13,7 +13,9 @@ const defaultData = {
             seedTense('indicativo', 'presente', { io: 'ho', tu: 'hai', 'lui_lei': 'ha', noi: 'abbiamo', voi: 'avete', loro: 'hanno' })
         ]),
         seedVerb('Andare', 'to go', [
-            seedTense('indicativo', 'presente', { io: 'vado', tu: 'vai', 'lui_lei': 'va', noi: 'andiamo', voi: 'andate', loro: 'vanno' })
+            seedTense('indicativo', 'presente', { io: 'vado', tu: 'vai', 'lui_lei': 'va', noi: 'andiamo', voi: 'andate', loro: 'vanno' }),
+            seedTense('indicativo', 'imperfetto', { io: 'andavo', tu: 'andavi', 'lui_lei': 'andava', noi: 'andavamo', voi: 'andavate', loro: 'andavano' }),
+            seedTense('indicativo', 'futuro semplice', { io: 'andrò', tu: 'andrai', 'lui_lei': 'andrà', noi: 'andremo', voi: 'andrete', loro: 'andranno' })
         ])
     ]
 };
