@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Italian Study Hub • Verbs</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Italian Study Hub · Verbs</h1>
+      <div class="grow"></div>
+      <button class="btn small" id="exportBtn">Export</button>
+      <label class="btn small" for="importFile">Import</label>
+      <input id="importFile" type="file" accept="application/json" hidden />
+      <button class="btn primary" id="addVerbBtn">Add Verb</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <input id="search" class="search" placeholder="Search verbs…" />
+      <div class="verb-list" id="verbList"></div>
+    </aside>
+
+    <section class="main" id="main">
+      <div class="empty">
+        Pick a verb or hit <b>Add Verb</b> to create one.
+        Your data saves to <b>this device</b>.
+      </div>
+    </section>
+  </main>
+
+  <footer>Tip: add this page to your phone’s Home Screen.</footer>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Verb</h3>
+        <button class="btn small" id="closeModal">Close</button>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Infinitive (it)</label>
+          <input id="vInf" placeholder="andare" />
+        </div>
+        <div>
+          <label>Translation (en)</label>
+          <input id="vEn" placeholder="to go" />
+        </div>
+      </div>
+
+      <div id="tenseContainer"></div>
+      <button class="btn small" id="addTenseBtn" style="margin-top:12px;">+ Add Tense</button>
+
+      <div class="right" style="margin-top:16px;">
+        <button class="btn" id="deleteVerbBtn" style="display:none;"><span class="danger">Delete</span></button>
+        <button class="btn primary" id="saveVerbBtn">Save Verb</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
