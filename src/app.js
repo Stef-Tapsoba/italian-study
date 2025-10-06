@@ -65,7 +65,7 @@ function renderTenseOptions(selectEl, mood, currentValue = "") {
 }
 
 // ---------------- Version check ----------------
-const APP_VERSION = "0.0.7"; // bump this when you push new seeds
+const APP_VERSION = "0.0.8"; // bump this when you push new seeds
 
 function checkVersion() {
   const storedVersion = localStorage.getItem('appVersion');
@@ -134,6 +134,15 @@ function renderSidebar(filter = '') {
     });
 }
 
+// ---- Filters (persisted per verb) ----
+function getFilters(verbId){
+  try { return JSON.parse(localStorage.getItem(`filters_${verbId}`)) || {mood:'all', tense:'all'}; }
+  catch { return {mood:'all', tense:'all'}; }
+}
+function setFilters(verbId, f){
+  localStorage.setItem(`filters_${verbId}`, JSON.stringify(f));
+}
+
 function renderMain(){
   const verb = DB.verbs.find(v=>v.id===ACTIVE_VERB_ID);
   if(!verb){
@@ -141,8 +150,22 @@ function renderMain(){
     return;
   }
 
-  // keep a queue (deck) of tenses
-  let deck = verb.tenses.slice();
+
+  // --- Mood/Tense filter state ---
+  let filters = getFilters(verb.id);
+  // Get all unique moods in this verb
+  const moods = [...new Set(verb.tenses.map(t => t.mood))];
+  // Get tenses for selected mood
+  const tensesForMood = filters.mood && filters.mood !== 'all'
+    ? verb.tenses.filter(t => t.mood === filters.mood).map(t => t.tense)
+    : [];
+
+  // Filter deck by mood/tense
+  let deck = verb.tenses.filter(t => {
+    if (filters.mood && filters.mood !== 'all' && t.mood !== filters.mood) return false;
+    if (filters.tense && filters.tense !== 'all' && t.tense !== filters.tense) return false;
+    return true;
+  });
 
   if (deck.length === 0) {
     mainEl.innerHTML = `
@@ -156,12 +179,27 @@ function renderMain(){
     return;
   }
 
+
   mainEl.innerHTML = `
     <div class="title-row">
       <h2>${verb.inf}</h2><span class="muted">(${verb.en})</span>
       <div class="grow"></div>
       <button class="btn small" data-shuffle>Shuffle</button>
       <button class="btn small" data-edit-verb="${verb.id}">Edit</button>
+    </div>
+    <div class="filter-row" style="display:flex;gap:10px;margin:12px 0;align-items:center;flex-wrap:wrap;">
+      <label style="font-size:.95em;">Mood:
+        <select id="moodSelect" style="font-size:1.1em;padding:6px 12px;border-radius:8px;">
+          <option value="all">All</option>
+          ${moods.map(m=>`<option value="${m}" ${filters.mood===m?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
+        </select>
+      </label>
+      <label style="font-size:.95em;">Tense:
+        <select id="tenseSelect" style="font-size:1.1em;padding:6px 12px;border-radius:8px;">
+          <option value="all">All</option>
+          ${tensesForMood.map(t=>`<option value="${t}" ${filters.tense===t?'selected':''}>${t.charAt(0).toUpperCase()+t.slice(1)}</option>`).join('')}
+        </select>
+      </label>
     </div>
     <div class="deck" id="flashDeck"></div>
     <div class="card-actions">
@@ -170,6 +208,22 @@ function renderMain(){
       <button class="fc-btn" data-action="next">Next →</button>
     </div>
   `;
+
+
+  // --- Dropdown event handlers ---
+  const moodSelect = mainEl.querySelector('#moodSelect');
+  const tenseSelect = mainEl.querySelector('#tenseSelect');
+  moodSelect.addEventListener('change', e => {
+    filters.mood = e.target.value;
+    filters.tense = 'all'; // reset tense when mood changes
+    setFilters(verb.id, filters);
+    renderMain();
+  });
+  tenseSelect.addEventListener('change', e => {
+    filters.tense = e.target.value;
+    setFilters(verb.id, filters);
+    renderMain();
+  });
 
   const deckEl = document.getElementById('flashDeck');
 
