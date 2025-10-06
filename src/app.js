@@ -1,45 +1,8 @@
+import { defaultData, seedTense, uid } from './data/default-data.js';
+
 // ---------- Data Layer ----------
 const LS_KEY = 'verbsDataV1';
 /** shape: { verbs: [{ id, inf, en, tenses: [{ id, mood, tense, forms: {io, tu, lui_lei, noi, voi, loro}}]}] } */
-
-const defaultData = {
-    verbs: [
-        seedVerb('Essere', 'to be', [
-            seedTense('indicativo', 'presente', { io: 'sono', tu: 'sei', 'lui_lei': 'è', noi: 'siamo', voi: 'siete', loro: 'sono' }),
-            seedTense('indicativo', 'imperfetto', { io: 'ero', tu: 'eri', 'lui_lei': 'era', noi: 'eravamo', voi: 'eravate', loro: 'erano' }),
-            seedTense('indicativo', 'futuro semplice', { io: 'sarò', tu: 'sarai', 'lui_lei': 'sarà', noi: 'saremo', voi: 'sarete', loro: 'saranno' }),
-            seedTense('indicativo', 'passato remoto', { io: 'fui', tu: 'fosti', 'lui_lei': 'fu', noi: 'fummo', voi: 'foste', loro: 'furono' }),
-            seedTense('indicativo', 'passato prossimo', { io: 'sono stato', tu: 'sei stato', 'lui_lei': 'è stato(a)', noi: 'siamo stati', voi: 'siete stati', loro: 'sono stati(e)' }),
-            seedTense('indicativo', 'trapassato prossimo', { io: 'ero stato', tu: 'eri stato', 'lui_lei': 'era stato(a)', noi: 'eravamo stati', voi: 'eravate stati', loro: 'erano stati(e)' }),
-            seedTense('indicativo', 'trapassato remoto', { io: 'fui stato', tu: 'fosti stato', 'lui_lei': 'fu stato(a)', noi: 'fummo stati', voi: 'foste stati', loro: 'furono stati(e)' }),
-            seedTense('indicativo', 'futuro anteriore', { io: 'sarò stato', tu: 'sarai stato', 'lui_lei': 'sarà stato(a)', noi: 'saremo stati', voi: 'sarete stati', loro: 'saranno stati(e)' })
-        ]),
-        seedVerb('Avere', 'to have', [
-            seedTense('indicativo', 'presente', { io: 'ho', tu: 'hai', 'lui_lei': 'ha', noi: 'abbiamo', voi: 'avete', loro: 'hanno' }),
-            seedTense('indicativo', 'imperfetto', { io: 'avevo', tu: 'avevi', 'lui_lei': 'aveva', noi: 'avevamo', voi: 'avevate', loro: 'avevano' }),
-            seedTense('indicativo', 'futuro semplice', { io: 'avrò', tu: 'avrai', 'lui_lei': 'avrà', noi: 'avremo', voi: 'avrete', loro: 'avranno' }),
-            seedTense('indicativo', 'passato remoto', { io: 'ebbi', tu: 'avesti', 'lui_lei': 'ebbe', noi: 'avemmo', voi: 'aveste', loro: 'ebbero' }),
-            seedTense('indicativo', 'passato prossimo', { io: 'ho avuto', tu: 'hai avuto', 'lui_lei': 'ha avuto', noi: 'abbiamo avuto', voi: 'avete avuto', loro: 'hanno avuto' }),
-            seedTense('indicativo', 'trapassato prossimo', { io: 'avevo avuto', tu: 'avevi avuto', 'lui_lei': 'aveva avuto', noi: 'avevamo avuto', voi: 'avevate avuto', loro: 'avevano avuto' }),
-            seedTense('indicativo', 'trapassato remoto', { io: 'ebbi avuto', tu: 'avesti avuto', 'lui_lei': 'ebbe avuto', noi: 'avemmo avuto', voi: 'aveste avuto', loro: 'ebbero avuto' }),
-            seedTense('indicativo', 'futuro anteriore', { io: 'avrò avuto', tu: 'avrai avuto', 'lui_lei': 'avrà avuto', noi: 'avremo avuto', voi: 'avrete avuto', loro: 'avranno avuto' })
-        ]),
-        seedVerb('Andare', 'to go', [
-            seedTense('indicativo', 'presente', { io: 'vado', tu: 'vai', 'lui_lei': 'va', noi: 'andiamo', voi: 'andate', loro: 'vanno' }),
-            seedTense('indicativo', 'imperfetto', { io: 'andavo', tu: 'andavi', 'lui_lei': 'andava', noi: 'andavamo', voi: 'andavate', loro: 'andavano' }),
-            seedTense('indicativo', 'futuro semplice', { io: 'andrò', tu: 'andrai', 'lui_lei': 'andrà', noi: 'andremo', voi: 'andrete', loro: 'andranno' }),
-            seedTense('indicativo', 'passato remoto', { io: 'andai', tu: 'andasti', 'lui_lei': 'andò', noi: 'andammo', voi: 'andaste', loro: 'andarono' }),
-            seedTense('indicativo', 'passato prossimo', { io: 'sono andato', tu: 'sei andato', 'lui_lei': 'è andato(a)', noi: 'siamo andati', voi: 'siete andati', loro: 'sono andati(e)' }),
-            seedTense('indicativo', 'trapassato prossimo', { io: 'ero andato', tu: 'eri andato', 'lui_lei': 'era andato(a)', noi: 'eravamo andati', voi: 'eravate andati', loro: 'erano andato(e)' }),
-            seedTense('indicativo', 'trapassato remoto', { io: 'fui andato', tu: 'fosti andato', 'lui_lei': 'fu andato(a)', noi: 'fummo andati', voi: 'foste andati', loro: 'furono andati(e)' }),
-            seedTense('indicativo', 'futuro anteriore', { io: 'sarò andato', tu: 'sarai andato', 'lui_lei': 'sarà andato(a)', noi: 'saremo andati', voi: 'sarete andati', loro: 'saranno andati(e)' })
-        ])
-    ]
-};
-
-function seedVerb(inf, en, tenses) { return { id: uid(), inf, en, tenses }; }
-function seedTense(mood, tense, forms) { return { id: uid(), mood, tense, forms }; }
-function uid() { return Math.random().toString(36).slice(2, 10); }
 
 // ---- Mood → Tense map ----
 const TENSES = {
@@ -65,7 +28,7 @@ function renderTenseOptions(selectEl, mood, currentValue = "") {
 }
 
 // ---------------- Version check ----------------
-const APP_VERSION = "0.0.8"; // bump this when you push new seeds
+const APP_VERSION = "0.0.9"; // bump this when you push new seeds
 
 function checkVersion() {
   const storedVersion = localStorage.getItem('appVersion');
