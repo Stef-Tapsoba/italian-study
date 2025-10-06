@@ -2,7 +2,33 @@ import { defaultData, seedTense, uid } from './data/default-data.js';
 
 // ---------- Data Layer ----------
 const LS_KEY = 'verbsDataV1';
-/** shape: { verbs: [{ id, inf, en, tenses: [{ id, mood, tense, forms: {io, tu, lui_lei, noi, voi, loro}}]}] } */
+/** shape: { verbs: [{ id, inf, en, tenses: [{ id, mood, tense, known, forms: {io, tu, lui_lei, noi, voi, loro}}]}] } */
+
+function normalizeVerb(verb = {}) {
+  const verbKnown = !!verb.known;
+  const tenses = Array.isArray(verb.tenses)
+    ? verb.tenses.map(t => {
+      const forms = typeof t.forms === 'object' && t.forms !== null ? { ...t.forms } : {};
+      return {
+        ...t,
+        id: t.id ?? uid(),
+        known: t.known !== undefined ? !!t.known : verbKnown,
+        forms
+      };
+    })
+    : [];
+  return {
+    ...verb,
+    id: verb.id ?? uid(),
+    known: verbKnown,
+    tenses
+  };
+}
+
+function normalizeDB(data = {}) {
+  const verbs = Array.isArray(data.verbs) ? data.verbs : [];
+  return { verbs: verbs.map(normalizeVerb) };
+}
 
 // ---- Mood → Tense map ----
 const TENSES = {
@@ -46,8 +72,8 @@ checkVersion();
 function load() {
     try {
         const raw = localStorage.getItem(LS_KEY);
-        return raw ? JSON.parse(raw) : defaultData;
-    } catch { return defaultData; }
+        return normalizeDB(raw ? JSON.parse(raw) : defaultData);
+    } catch { return normalizeDB(defaultData); }
 }
 function save(db) { localStorage.setItem(LS_KEY, JSON.stringify(db)); }
 
@@ -203,6 +229,27 @@ function renderMain(){
       el.style.transform = `translateY(${y}px) scale(${s})`;
       el.innerHTML = card3DHTML(verb, t);
       deckEl.appendChild(el);
+      const toggleBtn = el.querySelector('[data-tense-known-toggle]');
+      if (toggleBtn) {
+        const stop = evt => evt.stopPropagation();
+        toggleBtn.addEventListener('mousedown', stop);
+        toggleBtn.addEventListener('touchstart', stop, { passive: true });
+        toggleBtn.addEventListener('click', evt => {
+          evt.stopPropagation();
+          t.known = !t.known;
+          save(DB);
+          toggleBtn.classList.toggle('is-known', t.known);
+          toggleBtn.setAttribute('aria-pressed', t.known ? 'true' : 'false');
+          const labelText = t.known
+            ? `Mark ${verb.inf} · ${t.mood} ${t.tense} as unknown`
+            : `Mark ${verb.inf} · ${t.mood} ${t.tense} as known`;
+          const titleText = t.known
+            ? `${verb.inf} · ${t.mood} ${t.tense} is known`
+            : `Mark ${verb.inf} · ${t.mood} ${t.tense} as known`;
+          toggleBtn.setAttribute('aria-label', labelText);
+          toggleBtn.setAttribute('title', titleText);
+        });
+      }
       if (i === 0) attachInteractions(el); // only top card is interactive
     });
   }
@@ -291,21 +338,43 @@ function cap(s) { return (s || '').replace(/^\w/, c => c.toUpperCase()); }
 function card3DHTML(verb, tenseObj){
   const label = `${cap(tenseObj.mood)} · ${cap(tenseObj.tense)}`;
   const F = tenseObj.forms || {};
+  const isKnown = !!tenseObj.known;
+  const toggleLabel = isKnown
+    ? `Mark ${verb.inf} · ${tenseObj.mood} ${tenseObj.tense} as unknown`
+    : `Mark ${verb.inf} · ${tenseObj.mood} ${tenseObj.tense} as known`;
+  const toggleTitle = isKnown
+    ? `${verb.inf} · ${tenseObj.mood} ${tenseObj.tense} is known`
+    : `Mark ${verb.inf} · ${tenseObj.mood} ${tenseObj.tense} as known`;
+  const safeInf = escapeHTML(verb.inf);
+  const safeEn = escapeHTML(verb.en);
+  const safeLabel = escapeHTML(label);
+  const safeToggleLabel = escapeHTML(toggleLabel);
+  const safeToggleTitle = escapeHTML(toggleTitle);
   return `
     <div class="card3d">
+      <button
+        type="button"
+        class="known-toggle ${isKnown ? 'is-known' : ''}"
+        data-tense-known-toggle="${tenseObj.id}"
+        aria-pressed="${isKnown ? 'true' : 'false'}"
+        aria-label="${safeToggleLabel}"
+        title="${safeToggleTitle}"
+      >
+        <span aria-hidden="true"></span>
+      </button>
       <div class="card-inner" data-card>
         <div class="card-face front">
           <div class="card-title">
-            <span class="badge">${verb.inf}</span>
-            <b>${verb.en}</b>
+            <span class="badge">${safeInf}</span>
+            <b>${safeEn}</b>
           </div>
           <div style="display:grid;place-items:center;">
-            <h3 style="margin:24px 0 8px;font-size:1.15rem;">${label}</h3>
+            <h3 style="margin:24px 0 8px;font-size:1.15rem;">${safeLabel}</h3>
             <p class="muted" style="margin:0;">Tap to flip and see conjugations</p>
           </div>
         </div>
         <div class="card-face back">
-          <div class="card-title"><span class="badge">${label}</span></div>
+          <div class="card-title"><span class="badge">${safeLabel}</span></div>
           <table class="table-compact" style="margin-top:8px;">
             <thead><tr><th>Pronoun</th><th>Form</th></tr></thead>
             <tbody>
@@ -434,25 +503,37 @@ saveVerbBtn.addEventListener('click', () => {
     const en = vEnInput.value.trim();
     if (!inf) { alert('Infinitive is required.'); return; }
 
+    const existingVerb = EDIT_VERB_ID ? DB.verbs.find(x => x.id === EDIT_VERB_ID) : null;
+
     // Gather tenses from UI
-    const tenses = [...tenseContainer.querySelectorAll('.tense-box')].map(box => {
+    const tensesRaw = [...tenseContainer.querySelectorAll('.tense-box')].map(box => {
         const mood = box.querySelector('.mood').value.trim();
         const tense = box.querySelector('.tense-select').value.trim();
         const inputs = box.querySelectorAll('input[data-pronoun]');
         const forms = {};
         inputs.forEach(i => forms[i.getAttribute('data-pronoun')] = i.value.trim());
-        return { id: box.getAttribute('data-tense-id') || uid(), mood, tense, forms };
+        const id = box.getAttribute('data-tense-id') || uid();
+        const existingTense = existingVerb?.tenses.find(t => t.id === id);
+        return { id, mood, tense, forms, known: existingTense?.known ?? false };
     }).filter(t => t.tense); // keep only tenses with a name
 
-    if (EDIT_VERB_ID) {
+    const normalized = normalizeVerb({
+        ...(existingVerb ?? {}),
+        id: existingVerb?.id ?? uid(),
+        inf,
+        en,
+        tenses: tensesRaw
+    });
+
+    if (EDIT_VERB_ID && existingVerb) {
         // update existing
-        const v = DB.verbs.find(x => x.id === EDIT_VERB_ID);
-        v.inf = inf; v.en = en; v.tenses = tenses;
-        ACTIVE_VERB_ID = v.id;
+        existingVerb.inf = normalized.inf;
+        existingVerb.en = normalized.en;
+        existingVerb.tenses = normalized.tenses;
+        ACTIVE_VERB_ID = existingVerb.id;
     } else {
-        const v = { id: uid(), inf, en, tenses };
-        DB.verbs.push(v);
-        ACTIVE_VERB_ID = v.id;
+        DB.verbs.push(normalized);
+        ACTIVE_VERB_ID = normalized.id;
     }
     save(DB);
     renderSidebar(searchEl.value);
@@ -492,7 +573,7 @@ importFile.addEventListener('change', async () => {
         const text = await file.text();
         const data = JSON.parse(text);
         if (!data.verbs) throw new Error('Bad format');
-        DB = data;
+        DB = normalizeDB(data);
         save(DB);
         ACTIVE_VERB_ID = DB.verbs[0]?.id ?? null;
         renderSidebar();
