@@ -3,5 +3,6 @@ import andare from './andare.js';
 import dire from './dire.js';
 import essere from './essere.js';
 import fare from './fare.js';
+import volere from './volere.js';
 
-export default [essere, avere, andare, dire, fare];
+export default [essere, avere, andare, dire, fare, volere];
