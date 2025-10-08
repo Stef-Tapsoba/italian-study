@@ -54,7 +54,7 @@ function renderTenseOptions(selectEl, mood, currentValue = "") {
 }
 
 // ---------------- Version check ----------------
-const APP_VERSION = "0.1.2"; // bump this when you push new seeds
+const APP_VERSION = "0.1.3"; // bump this when you push new seeds
 
 function checkVersion() {
   const storedVersion = localStorage.getItem('appVersion');
