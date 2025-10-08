@@ -21,6 +21,9 @@ body.modal-open .card-actions {
     --pad: 16px;
     --gap: 12px;
     --max: 1100px;
+
+    /* card sizing */
+    --card-height: clamp(300px, 65vh, 500px);
 }
 
 * {
@@ -180,8 +183,8 @@ h1 {
 /* --- Flashcard deck container --- */
 .deck {
     position: relative;
-    height: 340px;
-    /* mobile-friendly height */
+    height: var(--card-height);
+    min-height: var(--card-height);
     margin-top: 12px;
 }
 
@@ -199,10 +202,9 @@ h1 {
     perspective: 1200px;
     transform-style: preserve-3d;
     isolation: isolate;
-    min-width: 420px;
+    width: min(420px, 100%);
     max-width: 100%;
-    width: fit-content;
-    min-height: 320px;
+    min-height: var(--card-height);
     margin: 0 auto;
     position: relative;
     display: flex;
@@ -265,7 +267,8 @@ h1 {
 /* The flipper */
 .card-inner {
     width: 100%;
-    min-height: 320px;
+    min-height: var(--card-height);
+    height: var(--card-height);
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.4,0.2,0.2,1);
@@ -288,7 +291,8 @@ h1 {
 .card-face {
     position: absolute;
     width: 100%;
-    min-height: 320px;
+    min-height: var(--card-height);
+    height: var(--card-height);
     top: 0;
     left: 0;
     display: flex;
@@ -301,6 +305,11 @@ h1 {
     will-change: transform;
     border-radius: 16px;
     box-sizing: border-box;
+}
+
+.card-face.back .table-compact {
+    max-height: calc(var(--card-height) - 140px);
+    overflow-y: auto;
 }
 
 /* FRONT: explicitly 0° and slightly forward */
@@ -375,6 +384,16 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
     .card-inner {
         transition: none;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --card-height: clamp(260px, 70vh, 420px);
+    }
+
+    .card3d {
+        width: 100%;
     }
 }
 
