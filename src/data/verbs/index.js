@@ -5,5 +5,6 @@ import essere from './essere.js';
 import fare from './fare.js';
 import volere from './volere.js';
 import venire from './venire.js';
+import capire from './capire.js';
 
-export default [essere, avere, andare, dire, fare, volere, venire];
+export default [essere, avere, andare, dire, fare, volere, venire, capire];
