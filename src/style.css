@@ -17,6 +17,24 @@ body.modal-open .card-actions {
     --gray: #f4f4f4;
     --dark: #1c1c1c;
 
+    /* theme tokens */
+    --page-bg: var(--gray);
+    --text-color: var(--dark);
+    --surface: #ffffff;
+    --surface-alt: #f8f8f8;
+    --border-color: #dddddd;
+    --border-soft: #f0f0f0;
+    --border-strong: #111111;
+    --input-border: #e5e5e5;
+    --input-bg: #ffffff;
+    --muted-text: rgba(28, 28, 28, 0.65);
+    --shadow-color: rgba(0, 0, 0, 0.05);
+    --badge-bg: #f9f9f9;
+    --table-border: #f1f1f1;
+    --table-header-bg: #fcfcfc;
+    --modal-backdrop: rgba(0, 0, 0, .35);
+    --control-border: #cfd3d7;
+
     /* layout vars */
     --pad: 16px;
     --gap: 12px;
@@ -24,6 +42,26 @@ body.modal-open .card-actions {
 
     /* card sizing */
     --card-height: clamp(300px, 65vh, 500px);
+}
+
+:root.theme-dark {
+    color-scheme: dark;
+    --page-bg: #0f1318;
+    --text-color: #f6f7fb;
+    --surface: #1a212c;
+    --surface-alt: #232b37;
+    --border-color: #2c3746;
+    --border-soft: #333f50;
+    --border-strong: #7bd9b4;
+    --input-border: #374355;
+    --input-bg: #111821;
+    --muted-text: rgba(246, 247, 251, 0.7);
+    --shadow-color: rgba(0, 0, 0, 0.55);
+    --badge-bg: rgba(255, 255, 255, 0.08);
+    --table-border: #2c3746;
+    --table-header-bg: #202836;
+    --modal-backdrop: rgba(0, 0, 0, 0.75);
+    --control-border: #5c6d85;
 }
 
 * {
@@ -39,8 +77,8 @@ body {
     margin: 0;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     line-height: 1.6;
-    background: var(--gray);
-    color: var(--dark);
+    background: var(--page-bg);
+    color: var(--text-color);
 }
 
 header {
@@ -81,6 +119,16 @@ h1 {
     font-weight: 500;
 }
 
+.btn.ghost {
+    border-color: rgba(0, 0, 0, 0.15);
+    background: transparent;
+    color: var(--text-color);
+}
+
+.theme-dark .btn.ghost {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
 .btn.primary {
     background: var(--green);
     color: var(--white);
@@ -114,8 +162,8 @@ h1 {
 
 /* Sidebar */
 .sidebar {
-    background: var(--white);
-    border: 1px solid #ddd;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: var(--pad);
 }
@@ -123,8 +171,10 @@ h1 {
 .search {
     width: 100%;
     padding: 10px;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--input-border);
     border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--text-color);
 }
 
 .verb-list {
@@ -135,23 +185,23 @@ h1 {
 
 .verb-item {
     padding: 10px;
-    border: 1px solid #f0f0f0;
+    border: 1px solid var(--border-soft);
     border-radius: 10px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #fff;
+    background: var(--surface);
     cursor: pointer;
 }
 
 .verb-item.active {
-    border-color: #111;
-    background: #f8f8f8;
+    border-color: var(--border-strong);
+    background: var(--surface-alt);
 }
 
 .verb-item small {
-    opacity: .7;
+    color: var(--muted-text);
 }
 
 /* Main */
@@ -161,7 +211,7 @@ h1 {
 
 .empty {
     padding: 30px;
-    opacity: .7;
+    color: var(--muted-text);
 }
 
 .title-row {
@@ -177,7 +227,7 @@ h1 {
 }
 
 .muted {
-    opacity: .7;
+    color: var(--muted-text);
 }
 
 /* --- Flashcard deck container --- */
@@ -231,12 +281,12 @@ h1 {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    border: 2px solid #cfd3d7;
-    color: #cfd3d7;
+    border: 2px solid var(--control-border);
+    color: var(--control-border);
     font-size: 14px;
     font-weight: 700;
     transition: all .2s ease;
-    background: #fff;
+    background: var(--surface);
 }
 
 .known-toggle span::before {
@@ -275,7 +325,7 @@ h1 {
     transform: translateZ(0);
     backface-visibility: hidden;
     border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    box-shadow: 0 4px 16px var(--shadow-color);
     display: flex;
     flex-direction: column;
     justify-content: stretch;
@@ -315,7 +365,7 @@ h1 {
 /* FRONT: explicitly 0° and slightly forward */
 .card-face.front {
     transform: rotateY(0deg) translateZ(0.5px);
-    background: #fff;
+    background: var(--surface);
     border-top: 5px solid transparent;
     border-image: linear-gradient(to right, var(--green), var(--white) 33%, var(--red) 66%) 1;
     z-index: 2;
@@ -324,7 +374,7 @@ h1 {
 /* BACK: 180° and a touch further forward than front when flipped */
 .card-face.back {
     transform: rotateY(180deg) translateZ(1px);
-    background: #fff;
+    background: var(--surface);
     z-index: 1;
 }
 
@@ -343,13 +393,13 @@ h1 {
 
 .table-compact td,
 .table-compact th {
-    border: 1px solid #f0f0f0;
+    border: 1px solid var(--table-border);
     padding: 6px 8px;
     text-align: left;
 }
 
 .table-compact thead th {
-    background: #fcfcfc;
+    background: var(--table-header-bg);
 }
 
 /* Deck controls under the card */
@@ -363,10 +413,11 @@ h1 {
 
 .fc-btn {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    background: #fff;
+    background: var(--surface);
     cursor: pointer;
+    color: var(--text-color);
 }
 
 .fc-btn.primary {
@@ -399,11 +450,11 @@ h1 {
 
 
 .card {
-    background: var(--white);
-    border: 1px solid #e0e0e0;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 6px var(--shadow-color);
     border-top: 5px solid transparent;
     border-image: linear-gradient(to right, var(--green), var(--white), var(--red)) 1;
 }
@@ -418,8 +469,9 @@ h1 {
     padding: 2px 8px;
     border-radius: 999px;
     font-size: .8rem;
-    border: 1px solid #eee;
-    background: #f9f9f9;
+    border: 1px solid var(--border-color);
+    background: var(--badge-bg);
+    color: var(--text-color);
 }
 
 table {
@@ -429,20 +481,20 @@ table {
 
 th,
 td {
-    border: 1px solid #f1f1f1;
+    border: 1px solid var(--table-border);
     padding: 6px 8px;
     text-align: left;
 }
 
 th {
-    background: #fcfcfc;
+    background: var(--table-header-bg);
 }
 
 /* Modal */
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, .35);
+    background: var(--modal-backdrop);
     display: none;
     align-items: center;
     justify-content: center;
@@ -451,10 +503,10 @@ th {
 
 .modal {
     width: min(720px, 100%);
-    background: #fff;
+    background: var(--surface);
     border-radius: 16px;
     padding: 16px;
-    border: 1px solid #eee;
+    border: 1px solid var(--border-color);
     max-height: 90vh;
     overflow: auto;
 }
@@ -479,9 +531,17 @@ select,
 textarea {
     width: 100%;
     padding: 10px;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--input-border);
     border-radius: 10px;
     font: inherit;
+    background: var(--input-bg);
+    color: var(--text-color);
+}
+
+input::placeholder,
+textarea::placeholder,
+.search::placeholder {
+    color: var(--muted-text);
 }
 
 input:focus,
@@ -491,10 +551,11 @@ select:focus {
 }
 
 .tense-box {
-    border: 1px dashed #ddd;
+    border: 1px dashed var(--border-color);
     border-radius: 12px;
     padding: 12px;
     margin-top: 12px;
+    background: var(--surface-alt);
 }
 
 .tense-grid {
@@ -520,8 +581,8 @@ select:focus {
 footer {
     padding: 20px;
     text-align: center;
-    color: var(--dark);
+    color: var(--text-color);
     border-top: 3px solid var(--green);
-    background: var(--white);
+    background: var(--surface);
     font-weight: 500;
 }

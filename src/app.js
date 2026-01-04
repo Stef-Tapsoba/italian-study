@@ -2,6 +2,7 @@ import { defaultData, seedTense, uid } from './data/default-data.js';
 
 // ---------- Data Layer ----------
 const LS_KEY = 'verbsDataV1';
+const THEME_KEY = 'ishThemePref';
 /** shape: { verbs: [{ id, inf, en, tenses: [{ id, mood, tense, known, forms: {io, tu, lui_lei, noi, voi, loro}}]}] } */
 
 function normalizeVerb(verb = {}) {
@@ -54,7 +55,7 @@ function renderTenseOptions(selectEl, mood, currentValue = "") {
 }
 
 // ---------------- Version check ----------------
-const APP_VERSION = "0.1.4"; // bump this when you push new seeds
+const APP_VERSION = "0.1.5"; // bump this when you push new seeds
 
 function checkVersion() {
   const storedVersion = localStorage.getItem('appVersion');
@@ -75,6 +76,7 @@ function load() {
         return normalizeDB(raw ? JSON.parse(raw) : defaultData);
     } catch { return normalizeDB(defaultData); }
 }
+
 function save(db) { localStorage.setItem(LS_KEY, JSON.stringify(db)); }
 
 let DB = load();
@@ -84,6 +86,7 @@ let ACTIVE_VERB_ID = DB.verbs[0]?.id ?? null;
 const verbListEl = document.getElementById('verbList');
 const mainEl = document.getElementById('main');
 const searchEl = document.getElementById('search');
+const getThemeToggleBtn = () => document.getElementById('themeToggle');
 
 const modalBackdrop = document.getElementById('modalBackdrop');
 const modalTitle = document.getElementById('modalTitle');
@@ -97,6 +100,61 @@ const closeModalBtn = document.getElementById('closeModal');
 const deleteVerbBtn = document.getElementById('deleteVerbBtn');
 const exportBtn = document.getElementById('exportBtn');
 const importFile = document.getElementById('importFile');
+
+const prefersDarkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+function syncThemeToggle(isDark) {
+    const themeToggleBtn = getThemeToggleBtn();
+    if (!themeToggleBtn) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => syncThemeToggle(isDark), { once: true });
+        }
+        return;
+    }
+    themeToggleBtn.setAttribute('aria-pressed', String(isDark));
+    themeToggleBtn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+}
+
+function applyTheme(mode, { persist = true } = {}) {
+    const isDark = mode === 'dark';
+    const rootEl = document.documentElement;
+    rootEl.classList.toggle('theme-dark', isDark);
+    syncThemeToggle(isDark);
+    if (persist) {
+        localStorage.setItem(THEME_KEY, mode);
+    }
+}
+
+function initTheme() {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'dark' || stored === 'light') {
+        applyTheme(stored, { persist: false });
+    } else {
+        const fallback = prefersDarkQuery?.matches ? 'dark' : 'light';
+        applyTheme(fallback, { persist: false });
+    }
+}
+
+document.addEventListener('click', (event) => {
+    const toggleBtn = event.target.closest('#themeToggle');
+    if (!toggleBtn) return;
+    const next = document.documentElement.classList.contains('theme-dark') ? 'light' : 'dark';
+    applyTheme(next);
+});
+
+if (prefersDarkQuery) {
+    const syncSystemTheme = (event) => {
+        if (localStorage.getItem(THEME_KEY)) return;
+        applyTheme(event.matches ? 'dark' : 'light', { persist: false });
+    };
+    if (typeof prefersDarkQuery.addEventListener === 'function') {
+        prefersDarkQuery.addEventListener('change', syncSystemTheme);
+    } else if (typeof prefersDarkQuery.addListener === 'function') {
+        prefersDarkQuery.addListener(syncSystemTheme);
+    }
+}
+
+initTheme();
 
 // ---------- Render Functions ----------
 function renderSidebar(filter = '') {
@@ -128,6 +186,7 @@ function getFilters(verbId){
   try { return JSON.parse(localStorage.getItem(`filters_${verbId}`)) || {mood:'all', tense:'all'}; }
   catch { return {mood:'all', tense:'all'}; }
 }
+
 function setFilters(verbId, f){
   localStorage.setItem(`filters_${verbId}`, JSON.stringify(f));
 }
@@ -424,6 +483,7 @@ function openVerbModal(verbId = null, focusTenseId = null) {
         }, 0);
     }
 }
+
 function closeVerbModal() {
   modalBackdrop.style.display = 'none';
   document.body.classList.remove('modal-open');
@@ -488,6 +548,7 @@ function inputRow(label, val) {
     </div>
 `;
 }
+
 function escapeHTML(s) { return (s ?? '').toString().replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
 
 // ---------- Events ----------
@@ -495,6 +556,7 @@ addVerbBtn.addEventListener('click', () => openVerbModal());
 addTenseBtn.addEventListener('click', () => {
     addTenseUI(seedTense('indicativo', 'presente', { io: '', tu: '', 'lui_lei': '', noi: '', voi: '', loro: '' }));
 });
+
 closeModalBtn.addEventListener('click', closeVerbModal);
 modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeVerbModal(); });
 
